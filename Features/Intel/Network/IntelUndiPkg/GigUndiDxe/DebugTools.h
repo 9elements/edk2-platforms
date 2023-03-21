@@ -72,7 +72,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INTERRUPT   (1 << 30)
 
 // Enable debug levels you want here.
+#ifndef MDEPKG_NDEBUG
+#define DBG_LVL (INIT | DIAG | CRITICAL | HII | HEALTH | ADAPTERINFO | DMA | WOL)
+#define DEBUGWAIT(Lvl)
+#else
 #define DBG_LVL (NONE)
+#endif
 #define OPENSRC_DBG_LVL (INIT | DIAG | CRITICAL | HII | HEALTH | ADAPTERINFO | DMA | WOL)
 
 

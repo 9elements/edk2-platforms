@@ -279,14 +279,13 @@ E1000WriteRegIo (
 
 typedef BOOLEAN boolean_t;
 
-
-#if (0)
-#define DEBUGFUNC(F)
-#define DEBUGOUT(s) Aprint (s);
-#define DEBUGOUT1(s, a) Aprint (s, a);
-#define DEBUGOUT2(s, a, b) Aprint (s, a, b);
-#define DEBUGOUT3(s, a, b, c) Aprint (s, a, b, c);
-#define DEBUGOUT7(s, a, b, c, d, e, f, g) Aprint (s, a, b, c, d, e, f, g);
+#ifndef MDEPKG_NDEBUG
+#define DEBUGFUNC(F) DEBUGDUMP (INIT, (F "\n"))
+#define DEBUGOUT(s)  do { DEBUGPRINT (INIT, (s)); } while (0)
+#define DEBUGOUT1(s, a) do { DEBUGPRINT(INIT, (s, a)); } while (0)
+#define DEBUGOUT2(s, a, b) do { DEBUGPRINT(INIT, (s, a, b)); } while (0)
+#define DEBUGOUT3(s, a, b, c) do { DEBUGPRINT(INIT, (s, a, b, c)); } while (0)
+#define DEBUGOUT7(s, a, b, c, d, e, f, g) do { DEBUGPRINT(INIT, (s, a, b, c, d, e, f, g)); } while (0)
 #else /* NOT (0) */
 
 /** Macro wrapper for shared code, blank here
