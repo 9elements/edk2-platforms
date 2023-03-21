@@ -1,0 +1,262 @@
+// *++
+//
+// INTEL CONFIDENTIAL
+//
+// Copyright (c) 2016 - 2022, Intel Corporation. All rights reserved.
+//
+// The source code contained or described herein and all documents related
+// to the source code ("Material") are owned by Intel Corporation or its
+// suppliers or licensors.  Title to the Material remains with Intel
+// Corporation or its suppliers and licensors.  The Material contains trade
+// secrets and proprietary and confidential information of Intel or its
+// suppliers and licensors.  The Material is protected by worldwide
+// copyright and trade secret laws and treaty provisions.  No part of the
+// Material may be used, copied, reproduced, modified, published, uploaded,
+// posted, transmitted, distributed, or disclosed in any way without Intel's
+// prior express written permission.
+//
+// No license under any patent, copyright, trade secret or other
+// intellectual property right is granted to or conferred upon you by
+// disclosure or delivery of the Materials, either expressly, by
+// implication, inducement, estoppel or otherwise.  Any license under such
+// intellectual property rights must be express and approved by Intel in
+// writing.
+//
+// --*/
+
+#include "XGigUndiDxeStrDefs.h"
+
+#include <Guid/HiiPlatformSetupFormset.h>
+#include "Forms/HiiFormDefs.h"
+#include "Hii/FormsetStd/HiiConfigData.h"
+
+//
+// Formset class used by Device Manager
+//
+#define EFI_NON_DEVICE_CLASS              0x00
+#define EFI_DISK_DEVICE_CLASS             0x01
+#define EFI_VIDEO_DEVICE_CLASS            0x02
+#define EFI_NETWORK_DEVICE_CLASS          0x04
+#define EFI_INPUT_DEVICE_CLASS            0x08
+#define EFI_ON_BOARD_DEVICE_CLASS         0x10
+#define EFI_OTHER_DEVICE_CLASS            0x20
+
+//
+// Formset subclass
+//
+#define EFI_SETUP_APPLICATION_SUBCLASS    0x00
+#define EFI_GENERAL_APPLICATION_SUBCLASS  0x01
+#define EFI_FRONT_PAGE_SUBCLASS           0x02
+#define EFI_SINGLE_USE_SUBCLASS           0x03
+
+//
+// EFI Variable attributes
+//
+#define EFI_VARIABLE_NON_VOLATILE       0x00000001
+#define EFI_VARIABLE_BOOTSERVICE_ACCESS 0x00000002
+#define EFI_VARIABLE_RUNTIME_ACCESS     0x00000004
+#define EFI_VARIABLE_READ_ONLY          0x00000008
+
+
+formset
+
+  guid     = HII_FORM_GUID,
+
+  title    = STRING_TOKEN(STR_INV_FORM_SET_TITLE),
+  help     = STRING_TOKEN(STR_INV_FORM_SET_HELP),
+
+  classguid = EFI_HII_PLATFORM_SETUP_FORMSET_GUID,
+
+  class     = EFI_NETWORK_DEVICE_CLASS,
+  subclass  = EFI_SETUP_APPLICATION_SUBCLASS,
+
+  //
+  // Define a Buffer Storage (EFI_IFR_VARSTORE)
+  //
+  varstore HII_STD_VARSTORE,         // This is the data structure type
+    varid = STORAGE_VARIABLE_ID,     // Optional VarStore ID
+    name  = NicCfgData,              // Define referenced name in vfr
+    guid  = HII_DATA_GUID;           // GUID of this buffer storage
+
+
+  form formid = FORM_MAIN,
+    title  = STRING_TOKEN(STR_INV_FORM_MAIN_TITLE);  // note formid is a variable (for readability) (UINT16) - also added Form to the line to signify the Op-Code
+
+    goto FORM_NIC,
+    prompt  = STRING_TOKEN(STR_NIC_CONFIG_MENU_REF),
+    help  =   STRING_TOKEN(STR_NIC_CONFIG_MENU_REF_HLP),
+    key = QUESTION_ID_NIC_CONFIG_MENU;
+
+
+    //
+    // Add a separation line
+    //
+    text
+      help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      flags  = 0,
+      key    = 0;
+
+    //
+    // Blink LED
+    //
+    numeric varid      = NicCfgData.BlinkLed,
+            questionid = QUESTION_ID_BLINK_LED,
+            prompt     = STRING_TOKEN(STR_BLINK_LED_PROMPT),
+            help       = STRING_TOKEN(STR_BLINK_LED_HLP),
+            flags      = INTERACTIVE,
+            minimum    = 0,
+            maximum    = 15,
+            step       = 0,
+            default    = 0,
+    endnumeric;
+
+    //
+    // Add a separation line
+    //
+    text
+      help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      flags  = 0,
+      key    = 0;
+
+      //
+      // UEFI Driver name
+      //
+      text
+        help   = STRING_TOKEN(STR_EFI_DRIVER_VER_HELP),
+        text   = STRING_TOKEN(STR_EFI_DRIVER_VER_PROMPT),
+        text   = STRING_TOKEN(STR_EFI_DRIVER_VER_TEXT),
+        flags  = 0,
+        key    = QUESTION_ID_EFI_DRIVER_VER;
+
+    //
+    // Adapter PBA
+    //
+    text
+      help   = STRING_TOKEN(STR_ADAPTER_PBA_HELP),
+      text   = STRING_TOKEN(STR_ADAPTER_PBA_PROMPT),
+      text   = STRING_TOKEN(STR_ADAPTER_PBA_TEXT),
+      flags  = 0,
+      key    = QUESTION_ID_ADAPTER_PBA;
+
+    //
+    // Device Name
+    //
+    text
+        help   = STRING_TOKEN(STR_DEVICE_NAME_HELP),
+        text   = STRING_TOKEN(STR_DEVICE_NAME_PROMPT),
+        text   = STRING_TOKEN(STR_DEVICE_NAME_TEXT),
+        flags  = 0,
+        key    = QUESTION_ID_DEVICE_NAME;
+
+    //
+    // Chip type
+    //
+    text
+      help   = STRING_TOKEN(STR_CONTROLER_ID_HELP),
+      text   = STRING_TOKEN(STR_CONTROLER_ID_PROMPT),
+      text   = STRING_TOKEN(STR_CONTROLER_ID_TEXT),
+      flags  = 0,
+      key    = QUESTION_ID_CONTROLER_ID;
+
+    //
+    // PCI Device ID
+    //
+    text
+      help   = STRING_TOKEN(STR_DEVICE_ID_HELP),
+      text   = STRING_TOKEN(STR_DEVICE_ID_PROMPT),
+      text   = STRING_TOKEN(STR_DEVICE_ID_TEXT),
+      flags  = 0,
+      key    = QUESTION_ID_DEVICE_ID;
+
+    //
+    // Bus/Device/Function
+    //
+    text
+      help   = STRING_TOKEN(STR_PCI_BUS_DEV_FUNC_HELP),
+      text   = STRING_TOKEN(STR_PCI_BUS_DEV_FUNC_PROMPT),
+      text   = STRING_TOKEN(STR_PCI_BUS_DEV_FUNC_TEXT),
+      flags  = 0,
+      key    = QUESTION_ID_PCI_BUS_DEV_FUNC;
+
+    //
+    // Add a separation line
+    //
+    text
+      help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      flags  = 0,
+      key    = 0;
+
+    //
+    // Link status
+    //
+    grayoutif TRUE; /* This is a READ ONLY field */
+
+      oneof name          = LinkStatus,
+            varid         = NicCfgData.LinkStatus,
+            questionid    = QUESTION_ID_LINK_STATUS,
+            prompt        = STRING_TOKEN(STR_LINK_STATUS_PROMPT),
+            help          = STRING_TOKEN(STR_LINK_STATUS_HELP),
+            flags         = 0,
+            default value = questionref(LinkStatus),
+            option text = STRING_TOKEN(STR_LINK_STAT_DISCONNECTED), value = DISABLED, flags = 0;
+            option text = STRING_TOKEN(STR_LINK_STAT_CONNECTED),    value = ENABLED,  flags = 0;
+            refresh interval = 3
+      endoneof;
+
+    endif;
+
+    //
+    // Add a separation line
+    //
+    text
+      help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      flags  = 0,
+      key    = 0;
+
+    //
+    // MAC Address
+    //
+    text
+      help   = STRING_TOKEN(STR_MAC_ADDR_HELP),
+      text   = STRING_TOKEN(STR_MAC_ADDR_PROMPT),
+      text   = STRING_TOKEN(STR_MAC_ADDR_TEXT),
+      flags  = 0,
+      key    = QUESTION_ID_MAC_ADDR;
+
+    //
+    // Alternate (a.k.a. Virtual) MAC Address
+    //
+    suppressif NOT_SUPPORTED (ALT_MAC);
+
+      grayoutif TRUE; /*  This is a READ ONLY field */
+        string name          = AltMacAddr,
+               varid         = NicCfgData.AltMacAddr,
+               questionid    = QUESTION_ID_ALT_MAC_ADDR,
+               prompt        = STRING_TOKEN(STR_ALT_MAC_ADDR_PROMPT),
+               help          = STRING_TOKEN(STR_ALT_MAC_ADDR_HELP),
+               flags         = 0,
+               minsize       = 17,
+               maxsize       = 17,
+               default value = questionref(AltMacAddr),
+        endstring;
+
+      endif;
+
+    endif; /* ALT_MAC */
+
+
+  endform;
+
+
+  #include "NicConfig.vfi"
+
+
+endformset;

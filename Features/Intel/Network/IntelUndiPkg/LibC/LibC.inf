@@ -1,0 +1,45 @@
+## @file
+#  Standard C library: Miscelaneous implementations.
+#
+#  Copyright (c) 2010 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+##
+
+[Defines]
+  INF_VERSION         = 0x00010005
+  BASE_NAME           = LibC
+  FILE_GUID           = 695bec93-82ae-4c17-bdad-7f184f4e651d
+  MODULE_TYPE         = UEFI_APPLICATION
+  VERSION_STRING      = 1.0
+  LIBRARY_CLASS       = LibC
+  VALID_ARCHITECTURES = IA32 X64 IPF AARCH64
+
+[Sources]
+  MemorySupport.c
+
+[Sources.IA32]
+  CustomMathIa32.c | MSFT  # __allmul, __allshl, __aullshr
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+
+# The Build Options, below, are only used when building the C library.
+# DO NOT use them when building your application!
+# Nasty things could happen if you do.
+
+[BuildOptions]
+  MSFT:*_*_*_CC_FLAGS     = /Oi- /GL-
+  GCC:*_*_*_CC_FLAGS = -D_SIZE_T_NOTDEFINED
+
+[BuildOptions.IA32]
+  MSFT:*_*_*_CC_FLAGS = /D _SIZE_T_NOTDEFINED

@@ -1,0 +1,15 @@
+name: IntelUndiPkg build action
+on:
+  push:
+    branches: [ master ]
+jobs:
+  # Should be an action
+  ci_matrix_build_intel_undipkg:
+    strategy:
+      # act seems to have problems spawning unique container names...
+      max-parallel: 1
+      matrix:
+        release_type: ["DEBUG", "RELEASE"]
+    with:
+      release_type: ${{ matrix.release_type }}
+    uses: ./.github/workflows/reusable.yaml

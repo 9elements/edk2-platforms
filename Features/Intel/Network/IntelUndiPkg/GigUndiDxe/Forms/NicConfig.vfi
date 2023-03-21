@@ -1,0 +1,115 @@
+// *++
+//
+// INTEL CONFIDENTIAL
+//
+// Copyright (c) 2016-2022, Intel Corporation. All rights reserved.
+//
+// The source code contained or described herein and all documents related
+// to the source code ("Material") are owned by Intel Corporation or its
+// suppliers or licensors.  Title to the Material remains with Intel
+// Corporation or its suppliers and licensors.  The Material contains trade
+// secrets and proprietary and confidential information of Intel or its
+// suppliers and licensors.  The Material is protected by worldwide
+// copyright and trade secret laws and treaty provisions.  No part of the
+// Material may be used, copied, reproduced, modified, published, uploaded,
+// posted, transmitted, distributed, or disclosed in any way without Intel's
+// prior express written permission.
+//
+// No license under any patent, copyright, trade secret or other
+// intellectual property right is granted to or conferred upon you by
+// disclosure or delivery of the Materials, either expressly, by
+// implication, inducement, estoppel or otherwise.  Any license under such
+// intellectual property rights must be express and approved by Intel in
+// writing.
+//
+// --*/
+
+form  formid = FORM_NIC,
+      title  = STRING_TOKEN(STR_NIC_CONFIG_MENU);
+
+  text
+    help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+    text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+    text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+    flags  = 0,
+    key    = 0;
+
+
+  //
+  // Add a separation line
+  //
+  text
+    help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+    text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+    text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+    flags  = 0,
+    key    = 0;
+
+  suppressif NOT_SUPPORTED (LINK_SPEED);
+    grayoutif RD_ONLY (LINK_SPEED);
+    //
+    // Empty line
+    //
+    text
+      help   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      text   = STRING_TOKEN(STR_INV_EMPTY_STRING),
+      flags  = 0,
+      key    = 0;
+
+      oneof name        = LinkSpeed,
+          varid         = NicCfgData.LinkSpeed,
+          questionid    = QUESTION_ID_LINK_SPEED,
+          prompt        = STRING_TOKEN(STR_LINK_SPEED_PROMPT),
+          help          = STRING_TOKEN(STR_LINK_SPEED_HELP),
+          flags         = 0,
+          option text   = STRING_TOKEN(STR_AUTONEG_TEXT), value = LINK_SPEED_AUTO_NEG,  flags = DEFAULT;
+
+          suppressif RD_ONLY (LINK_SPEED);
+            option text = STRING_TOKEN(STR_10HALF_TEXT),   value = LINK_SPEED_10HALF,   flags = 0;
+            option text = STRING_TOKEN(STR_10FULL_TEXT),   value = LINK_SPEED_10FULL,   flags = 0;
+            option text = STRING_TOKEN(STR_100HALF_TEXT),  value = LINK_SPEED_100HALF,  flags = 0;
+            option text = STRING_TOKEN(STR_100FULL_TEXT),  value = LINK_SPEED_100FULL,  flags = 0;
+          endif;
+
+      endoneof;
+    endif; /* RO LINK_SPEED */
+  endif; /* LINK_SPEED */
+
+  suppressif TRUE;
+    numeric name          = DefaultWolStatus,
+            varid         = NicCfgData.DefaultWolStatus,
+            questionid    = QUESTION_ID_DEFAULT_WOL,
+            prompt        = STRING_TOKEN(STR_INV_EMPTY_STRING),
+            help          = STRING_TOKEN(STR_INV_EMPTY_STRING),
+            flags         = READ_ONLY,
+            minimum       = 0,
+            maximum       = 2,
+            default value = questionref(DefaultWolStatus),
+    endnumeric;
+  endif;
+
+  grayoutif ideqval NicCfgData.WolStatus == WOL_NA;
+    oneof varid         = NicCfgData.WolStatus,
+          questionid    = QUESTION_ID_WOL,
+          prompt        = STRING_TOKEN(STR_WOL_TEXT),
+          help          = STRING_TOKEN(STR_WOL_HELP),
+          flags         = 0,
+          default value = questionref(DefaultWolStatus),
+
+          suppressif ideqval NicCfgData.WolStatus == WOL_NA;
+            option text = STRING_TOKEN(STR_DISABLED_TEXT), value = WOL_DISABLE, flags = 0;
+            option text = STRING_TOKEN(STR_ENABLED_TEXT),  value = WOL_ENABLE,  flags = 0;
+          endif
+
+          suppressif NOT ideqval NicCfgData.WolStatus == WOL_NA;
+            option text = STRING_TOKEN(STR_NA_TEXT),       value = WOL_NA,      flags = 0;
+          endif
+    endoneof;
+  endif; // grayoutif
+
+
+
+
+
+endform;

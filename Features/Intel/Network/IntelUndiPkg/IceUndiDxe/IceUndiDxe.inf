@@ -1,0 +1,220 @@
+# /**************************************************************************
+# 
+# Copyright (c) 2016 - 2022, Intel Corporation. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Intel Corporation nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
+#       without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# ***************************************************************************/
+
+[Defines]
+  INF_VERSION          = 0x00010005
+  BASE_NAME            = IceUndiDxe
+  FILE_GUID            = 708C91EA-0394-4610-9EB3-A30AB99015AF
+
+  # UEFI_DRIVER is compliant with EFI1.10 or UEFI 2.3 specification
+  MODULE_TYPE          = UEFI_DRIVER
+
+  VERSION_STRING       = 1.0
+  ENTRY_POINT          = InitializeUNDIDriver
+  UNLOAD_IMAGE         = IceUndiUnload
+
+[BuildOptions.common]
+  *_*_*_CC_FLAGS = -D UNDI_ICE -D PREBOOT_SUPPORT -D NO_FLEXP_SUPPORT -D NO_ACL_SUPPORT -D NO_ADV_SW_SUPPORT -D NO_PTP_SUPPORT
+  *_*_*_CC_FLAGS = -D RXTX_RING_SIZE=64 -D COLUMBIA_PARK_HW -D SDK_SUPPORT
+  *_*_*_CC_FLAGS = -D MDEPKG_NDEBUG -D UNDI_ICE -D PF_DRIVER -D NO_DELL_EXTENSIONS -D NO_HP_EXTENSIONS
+  *_*_*_CC_FLAGS = -D E810C_SUPPORT -D E822_SUPPORT -D E810_XXV_SUPPORT -D E823_SUPPORT -D E823C_SUPPORT -D E825C_SUPPORT
+
+  # Enable to use PciIo protocols for PCI reads/writes. (Experimental!)
+  #*_*_*_CC_FLAGS = -D CONFIG_ACCESS_TO_CSRS
+
+  # WITH THIS FLAG HW IS INITIALIZED ON THE START AND FURTHER SHUTDOWN, RESET AND INITIALIZATION CALLS ARE SKIPPED
+  #*_*_*_CC_FLAGS = -D AVOID_HW_REINITIALIZATION
+
+  # Produces extra debug info (assembly listings, etc) in the output if building with Microsoft compilers.
+  MSFT:*_*_*_CC_FLAGS = /FAcs
+
+  # Disable debug macros for RELEASE builds.
+  RELEASE_*_*_CC_FLAGS = -D MDEPKG_NDEBUG
+
+  # Disable shared code warnings on MSVC.
+  # - 4055: Type cast from data pointer to function pointer
+  # - 4244: conversion from ... to ..., possible loss of data
+  # - 4389: '==': signed/unsigned mismatch
+  MSFT:*_*_*_CC_FLAGS = /wd4055 /wd4244 /wd4389
+
+  *_*_*_VFRPP_FLAGS = -D UNDI_ICE -D NO_DELL_EXTENSIONS -D NO_PXE_HII_SUPPORT -D NO_HP_EXTENSIONS
+
+[BuildOptions.X64]
+  *_*_*_CC_FLAGS = -D EFIX64
+
+[BuildOptions.IA32]
+  *_*_*_CC_FLAGS = -D EFI32
+
+  # Disable warning 4305: truncation from ... to ... (data loss when casting to a smaller type)
+  MSFT:*_*_*_CC_FLAGS = /wd4305
+
+[BuildOptions.ARM]
+  *_*_*_CC_FLAGS = -D ARCH_ARM
+
+[BuildOptions.AARCH64]
+  *_*_*_CC_FLAGS = -D ARCH_AARCH64
+
+[Packages]
+  IntelUndiPkg/IntelIceUndiPkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  PcAtChipsetPkg/PcAtChipsetPkg.dec
+
+[LibraryClasses.common]
+  BaseLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
+  BaseMemoryLib
+  PrintLib
+  UefiLib
+  HiiLib
+  SynchronizationLib
+  StdLibC
+
+[Protocols.common]
+  gEfiNetworkInterfaceIdentifierProtocolGuid_31
+  gEfiPciIoProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiFormBrowser2ProtocolGuid      ## CONSUMES
+  gEfiHiiStringProtocolGuid         ## CONSUMES
+  gEfiHiiConfigRoutingProtocolGuid  ## CONSUMES
+  gEfiHiiConfigAccessProtocolGuid   ## PRODUCES
+  gEfiFormBrowser2ProtocolGuid      ## CONSUMES
+  gEfiHiiDatabaseProtocolGuid       ## CONSUMES
+  gEfiHiiPackageListProtocolGuid    ## CONSUMES
+  gEfiDriverSupportedEfiVersionProtocolGuid
+  gEfiDriverHealthProtocolGuid
+
+[Guids]
+  gEfiIfrTianoGuid                   ## CONSUMES ## Guid
+  gEfiEventExitBootServicesGuid      ## PRODUCES ## Event
+  gEfiEventVirtualAddressChangeGuid  ## PRODUCES ## Event
+
+[Sources.common]
+  AdapterInformation.c
+  AdapterInformation.h
+  Brand.c
+  CommonDriver.h
+  ComponentName.c
+  ComponentName.h
+  DebugTools.c
+  DebugTools.h
+  Decode.c
+  Decode.h
+  DeviceSupport.c
+  DeviceSupport.h
+  Dma.c
+  Dma.h
+  DriverDiagnostics.c
+  DriverDiagnostics.h
+  DriverHealth.c
+  EepromConfig.c
+  EepromConfig.h
+  Ice.c
+  Ice.h
+  ice_osdep.h
+  IceDriverHealth.c
+  Init.c
+  Link.c
+  Link.h
+  LinkTopology.c
+  LinkTopology.h
+  StartStop.c
+  StartStop.h
+  Version.h
+
+  Forms/DeviceLevelConfig.vfi
+  Forms/InventoryStrings.uni
+  Forms/Inventory.vfr
+  Forms/NicConfig.vfi
+  Forms/PortOptionConfig.vfi
+
+  Hii/CfgAccessProt/HiiConfigAccess.c
+
+  Hii/FormsetStd/HiiCallbacks.c
+  Hii/FormsetStd/HiiConfigMap.c
+  Hii/FormsetStd/HiiGetters.c
+  Hii/FormsetStd/HiiSetters.c
+  Hii/FormsetStd/HiiStaticInventoryMap.c
+  Hii/FormsetStd/HiiStaticInvGetters.c
+  Hii/FormsetStd/HiiSupportEval.c
+  Hii/FormsetStd/PortOptions.c
+  Hii/FormsetStd/PortOptions.h
+
+  Hii/DynamicForms.c
+  Hii/DynamicForms.h
+  Hii/HiiSetup.c
+
+  wol/wol.c
+  wol/wol.h
+  wol/wol_100G.c
+  wol/wolfamily.c
+  wol/wolimpl.c
+  wol/wolimpl.h
+  wol/wolinfo.c
+
+  ice_acl.c
+  ice_acl.h
+  ice_acl_ctrl.c
+  ice_adminq_cmd.h
+  ice_alloc.h
+  ice_bitops.h
+  ice_common.c
+  ice_common.h
+  ice_controlq.c
+  ice_controlq.h
+  ice_dcb.c
+  ice_dcb.h
+  ice_devids.h
+  ice_fdir.c
+  ice_fdir.h
+  ice_flex_pipe.c
+  ice_flex_pipe.h
+  ice_flex_type.h
+  ice_flow.c
+  ice_flow.h
+  ice_hw_autogen.h
+  ice_impl_guide.c
+  ice_lan_tx_rx.h
+  ice_nvm.c
+  ice_nvm.h
+  ice_protocol_type.h
+  ice_sbq_cmd.h
+  ice_sched.c
+  ice_sched.h
+  ice_status.h
+  ice_switch.c
+  ice_switch.h
+  ice_type.h
+  ice_vf_mbx.c
+  ice_vf_mbx.h
+  ice_vlan_mode.c
+  ice_vlan_mode.h

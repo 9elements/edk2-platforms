@@ -1,0 +1,199 @@
+# /**************************************************************************
+# 
+# Copyright (c) 2012 - 2021, Intel Corporation
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Intel Corporation nor the names of its contributors
+#       may be used to endorse or promote products derived from this software
+#       without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# ***************************************************************************/
+
+[Defines]
+  INF_VERSION          = 0x00010005
+  BASE_NAME            = GigUndiDxe
+  FILE_GUID            = BB801A52-C90F-4EDE-91B2-82520888CBC3
+
+  # UEFI_DRIVER is compliant with EFI1.10 or UEFI 2.0 specification
+  MODULE_TYPE          = UEFI_DRIVER
+
+  VERSION_STRING       = 1.0
+  ENTRY_POINT          = InitializeGigUNDIDriver
+  UNLOAD_IMAGE         = GigUndiUnload
+
+[BuildOptions.common]
+  *_*_*_CC_FLAGS = -D UNDI_1G -D PREBOOT_SUPPORT
+
+  # Enable to use PciIo protocols for PCI reads/writes. (Experimental!)
+  #*_*_*_CC_FLAGS = -D CONFIG_ACCESS_TO_CSRS
+
+  # Generates extra debug info when building with Microsoft compilers.
+  MSFT:*_*_*_CC_FLAGS = /FAcs
+
+  # Disable deprecated/unsafe functions (will cause build errors on use)
+  *_*_*_CC_FLAGS = -D DISABLE_NEW_DEPRECATED_INTERFACES
+
+  # Disable debug macros for RELEASE builds.
+  RELEASE_*_*_CC_FLAGS = -D MDEPKG_NDEBUG
+
+  # Disable shared code warnings on MSVC.
+  # - 4206: translation unit empty (occasionally happens in shared code)
+  # - 4244: conversion from ... to ..., possible loss of data
+  MSFT:*_*_*_CC_FLAGS = /wd4206 /wd4244
+
+[BuildOptions.X64]
+  *_*_*_CC_FLAGS = -D EFIX64
+
+[BuildOptions.IA32]
+  *_*_*_CC_FLAGS = -D EFI32
+
+  # Disable warning 4305: truncation from ... to ... (data loss when casting to a smaller type)
+  MSFT:*_*_*_CC_FLAGS = /wd4305
+
+[BuildOptions.ARM]
+  *_*_*_CC_FLAGS = -D ARCH_ARM
+
+[BuildOptions.AARCH64]
+  *_*_*_CC_FLAGS = -D ARCH_AARCH64
+
+[Sources.common]
+  AdapterInformation.c
+  AdapterInformation.h
+  Brand.c
+  CommonDriver.h
+  ComponentName.c
+  ComponentName.h
+  DebugTools.c
+  DebugTools.h
+  Decode.c
+  Decode.h
+  DeviceSupport.c
+  DeviceSupport.h
+  Dma.c
+  Dma.h
+  DriverConfiguration.c
+  DriverConfiguration.h
+  DriverDiagnostics.c
+  DriverDiagnostics.h
+  DriverHealth.c
+  E1000.c
+  E1000.h
+  e1000_osdep.c
+  e1000_osdep.h
+  EepromConfig.c
+  EepromConfig.c
+  GigDriverHealth.c
+  Init.c
+  StartStop.c
+  StartStop.h
+  Version.h
+
+  Forms/InventoryStrings.uni
+  Forms/Inventory.vfr
+  Forms/NicConfig.vfi
+
+  Hii/CfgAccessProt/HiiConfigAccess.c
+
+  Hii/FormsetStd/HiiCallbacks.c
+  Hii/FormsetStd/HiiConfigMap.c
+  Hii/FormsetStd/HiiGetters.c
+  Hii/FormsetStd/HiiSetters.c
+  Hii/FormsetStd/HiiStaticInvGetters.c
+  Hii/FormsetStd/HiiStaticInventoryMap.c
+  Hii/FormsetStd/HiiSupportEval.c
+
+  Hii/HiiSetup.c
+
+  e1000_80003es2lan.c
+  e1000_80003es2lan.h
+  e1000_82571.c
+  e1000_82571.h
+  e1000_82575.c
+  e1000_82575.h
+  e1000_api.c
+  e1000_api.h
+  e1000_defines.h
+  e1000_hw.h
+  e1000_base.c
+  e1000_base.h
+  e1000_i210.c
+  e1000_i210.h
+  e1000_ich8lan.c
+  e1000_ich8lan.h
+  e1000_mac.c
+  e1000_mac.h
+  e1000_manage.c
+  e1000_manage.h
+  e1000_nvm.c
+  e1000_nvm.h
+  e1000_phy.c
+  e1000_phy.h
+  e1000_regs.h
+
+  wol/wol.c
+  wol/wol.h
+  wol/wolfamily.c
+  wol/wolimpl.c
+  wol/wolimpl.h
+  wol/wolinfo.c
+  wol/wol_1G.c
+
+  LanEngine/Receive.c
+  LanEngine/Receive.h
+  LanEngine/ReceiveDep.c
+  LanEngine/Transmit.c
+  LanEngine/Transmit.h
+  LanEngine/TransmitDep.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses.common]
+  StdLibC
+  BaseLib
+  MemoryAllocationLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiRuntimeServicesTableLib
+  BaseMemoryLib
+  PrintLib
+  UefiLib
+  HiiLib
+
+[Protocols.common]
+  gEfiNetworkInterfaceIdentifierProtocolGuid_31
+  gEfiPciIoProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiFormBrowser2ProtocolGuid                  ## CONSUMES
+  gEfiHiiStringProtocolGuid                     ## CONSUMES
+  gEfiHiiConfigRoutingProtocolGuid              ## CONSUMES
+  gEfiHiiConfigAccessProtocolGuid               ## PRODUCES
+  gEfiFormBrowser2ProtocolGuid                  ## CONSUMES
+  gEfiHiiDatabaseProtocolGuid                   ## CONSUMES
+  gEfiHiiPackageListProtocolGuid                ## CONSUMES
+  gEfiDriverSupportedEfiVersionProtocolGuid
+  gEfiDriverHealthProtocolGuid
+
+[Guids]
+  gEfiIfrTianoGuid                  ## CONSUMES ## Guid
+  gEfiEventExitBootServicesGuid     ## PRODUCES ## Event
+  gEfiEventVirtualAddressChangeGuid ## PRODUCES ## Event

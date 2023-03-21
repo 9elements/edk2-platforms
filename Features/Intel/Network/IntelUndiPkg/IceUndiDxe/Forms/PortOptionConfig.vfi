@@ -1,0 +1,77 @@
+// /**************************************************************************
+// 
+// Copyright (c) 2021-2022, Intel Corporation. All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 
+//     * Redistributions of source code must retain the above copyright notice,
+//       this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//     * Neither the name of Intel Corporation nor the names of its contributors
+//       may be used to endorse or promote products derived from this software
+//       without specific prior written permission.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// 
+// ***************************************************************************/
+
+//
+// Port Option Configuration form
+//
+form  formid = FORM_PORT_OPTION_CONFIG,
+  title  = STRING_TOKEN(STR_PORT_OPTION_TITLE);
+
+  suppressif NOT RD_ONLY (PORT_OPTIONS);
+    subtitle text = STRING_TOKEN(STR_PORT_NVM_UPDATE_PENDING);
+  endif;
+
+  grayoutif RD_ONLY (PORT_OPTIONS);
+    label   PORT_OPTION_BEGIN_LABEL;
+    // Port option oneof goes here
+    label   PORT_OPTION_END_LABEL;
+  endif;
+
+  subtitle text = STRING_TOKEN(STR_PORT_OPTION_SEPARATOR);
+
+  label   PORT_OPTION_MENU_BEGIN_LABEL;
+  // Port option form GOTOs go here
+  label   PORT_OPTION_MENU_END_LABEL;
+
+endform;
+
+//
+// Port Option Details form
+//
+form  formid = FORM_PORT_OPTION_CONFIG_DETAILS,
+  title  = STRING_TOKEN(STR_PORT_OPTION_TITLE);
+
+  label   PORT_OPTION_FORM_ENTRY_LABEL;
+  // Port option details go here
+  label   PORT_OPTION_FORM_END_LABEL;
+
+endform;
+
+//
+// Port Option Details for all ports form. Used to store x-UEFI strings for remote.
+// Not visible in HII.
+//
+form  formid = FORM_PORT_OPTION_CONFIG_FOR_ALL_PORTS,
+  title  = STRING_TOKEN(STR_PORT_OPTION_TITLE);
+
+  label   PORT_OPTION_DETAILS_BEGIN_LABEL;
+  // Port option details with x-UEFI strings go here
+  label   PORT_OPTION_DETAILS_END_LABEL;
+
+endform;
