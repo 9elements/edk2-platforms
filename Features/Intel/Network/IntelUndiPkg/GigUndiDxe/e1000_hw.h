@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _E1000_HW_H_
 #define _E1000_HW_H_
 
+#include "DebugTools.h"
 #include "e1000_osdep.h"
 #include "e1000_regs.h"
 #include "e1000_defines.h"
