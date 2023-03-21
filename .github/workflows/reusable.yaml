@@ -1,0 +1,65 @@
+name: Reusable IntelUndiPkg build action
+on:
+  workflow_call:
+    inputs:
+      release_type:
+        required: true
+        type: string
+      submodule_path:
+        required: false
+        default: ""
+        type: string
+jobs:
+  # Should be an action
+  reusable_intel_undipkg_build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/9elements/uefi:edk2-stable202205
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Build IntelUndiPkg
+        shell: bash
+        run: |
+            cp -r "./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/" "${WORKSPACE_CORE}"
+            cd "${WORKSPACE_CORE}"
+            make -C BaseTools
+            . edksetup.sh
+
+            echo "Allow all warnings..."
+            sed -i Conf/tools_def.txt -e "s/-Wall -Werror -Wno-array-bounds/-Wall -Wno-array-bounds/g"
+
+            build -a X64 -t GCC5 -p IntelUndiPkg/IntelGigUndiPkg.dsc -m IntelUndiPkg/GigUndiDxe/GigUndiDxe.inf -b ${{ inputs.release_type }}
+            build -a X64 -t GCC5 -p IntelUndiPkg/IntelI40eUndiPkg.dsc -m IntelUndiPkg/I40eUndiDxe/I40eUndiDxe.inf -b ${{ inputs.release_type }}
+            build -a X64 -t GCC5 -p IntelUndiPkg/IntelIceUndiPkg.dsc -m IntelUndiPkg/IceUndiDxe/IceUndiDxe.inf -b ${{ inputs.release_type }}
+            build -a X64 -t GCC5 -p IntelUndiPkg/IntelXGigUndiPkg.dsc -m IntelUndiPkg/XGigUndiDxe/XGigUndiDxe.inf -b ${{ inputs.release_type }}
+
+            cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/GigUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/GigUndiDxe.efi
+            cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/I40eUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/I40eUndiDxe.efi
+            cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/IceUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/IceUndiDxe.efi
+            cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/XGigUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/XGigUndiDxe.efi
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: intel-undi-GigUndiDxe-${{ inputs.release_type }}
+          path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/GigUndiDxe.efi
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: intel-undi-I40eUndiDxe-${{ inputs.release_type }}
+          path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/I40eUndiDxe.efi
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: intel-undi-IceUndiDxe-${{ inputs.release_type }}
+          path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/IceUndiDxe.efi
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: intel-undi-XGigUndiDxe-${{ inputs.release_type }}
+          path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/XGigUndiDxe.efi
