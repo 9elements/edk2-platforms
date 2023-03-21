@@ -415,6 +415,14 @@ E1000FlashRead (
 {
   UINT32       Results;
   DRIVER_DATA *AdapterInfo = Hw->back;
+  UINTN        BarIndex;
+
+  if (Hw->mac.type >= e1000_pch_spt) {
+    BarIndex = 0;
+    Port += E1000_FLASH_BASE_ADDR;
+  } else {
+    BarIndex = 1;
+  }
 
   if (IsSurpriseRemoval (AdapterInfo)) {
     return INVALID_STATUS_REGISTER_VALUE;
@@ -424,7 +432,7 @@ E1000FlashRead (
   AdapterInfo->PciIo->Mem.Read (
                             AdapterInfo->PciIo,
                             EfiPciIoWidthUint32,
-                            1,
+                            BarIndex,
                             Port,
                             1,
                             (VOID *) (&Results)
@@ -455,6 +463,14 @@ E1000FlashRead16 (
 {
   UINT16       Results;
   DRIVER_DATA *AdapterInfo = Hw->back;
+  UINTN        BarIndex;
+
+  if (Hw->mac.type >= e1000_pch_spt) {
+    BarIndex = 0;
+    Port += E1000_FLASH_BASE_ADDR;
+  } else {
+    BarIndex = 1;
+  }
 
   if (IsSurpriseRemoval (AdapterInfo)) {
     return 0xFFFF;
@@ -464,7 +480,7 @@ E1000FlashRead16 (
   AdapterInfo->PciIo->Mem.Read (
                             AdapterInfo->PciIo,
                             EfiPciIoWidthUint16,
-                            1,
+                            BarIndex,
                             Port,
                             1,
                             (VOID *) (&Results)
@@ -497,6 +513,14 @@ E1000FlashWrite (
 {
   UINT32       Value;
   DRIVER_DATA *AdapterInfo;
+  UINTN        BarIndex;
+
+  if (Hw->mac.type >= e1000_pch_spt) {
+    BarIndex = 0;
+    Port += E1000_FLASH_BASE_ADDR;
+  } else {
+    BarIndex = 1;
+  }
 
   AdapterInfo = Hw->back;
   Value = Data;
@@ -507,10 +531,11 @@ E1000FlashWrite (
 
   MemoryFence ();
 
+
   AdapterInfo->PciIo->Mem.Write (
                             AdapterInfo->PciIo,
                             EfiPciIoWidthUint32,
-                            1,
+                            BarIndex,
                             Port,
                             1,
                             (VOID *) (&Value)
@@ -541,6 +566,14 @@ E1000FlashWrite16 (
   )
 {
   DRIVER_DATA *AdapterInfo = Hw->back;
+  UINTN        BarIndex;
+
+  if (Hw->mac.type >= e1000_pch_spt) {
+    BarIndex = 0;
+    Port += E1000_FLASH_BASE_ADDR;
+  } else {
+    BarIndex = 1;
+  }
 
   if (IsSurpriseRemoval (AdapterInfo)) {
     return;
@@ -551,7 +584,7 @@ E1000FlashWrite16 (
   AdapterInfo->PciIo->Mem.Write (
                             AdapterInfo->PciIo,
                             EfiPciIoWidthUint16,
-                            1,
+                            BarIndex,
                             Port,
                             1,
                             (VOID *) (&Data)
