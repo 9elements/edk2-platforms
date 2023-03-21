@@ -594,7 +594,7 @@ SetLldpAgentStatus (
   IN  BOOLEAN            *LldpAgentEna
   )
 {
-  enum ice_status_code  IceStatus;
+  enum ice_status       IceStatus;
   EFI_STATUS            Status;
   BOOLEAN               CurrentLldpAgentEna;
 
