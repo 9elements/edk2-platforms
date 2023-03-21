@@ -60,7 +60,9 @@
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   SynchronizationLib|MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
-  
+
+!include MdePkg/MdeLibs.dsc.inc
+
 #-------------------------------------------------------------------------------
 # Use DebugPrint() function across the code for console prints.
 #-------------------------------------------------------------------------------

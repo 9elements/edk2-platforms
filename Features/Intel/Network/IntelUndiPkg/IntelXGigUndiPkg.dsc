@@ -61,6 +61,8 @@
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
 
+!include MdePkg/MdeLibs.dsc.inc
+
 ################################################################################
 #
 # Pcd Section - list of all EDK II PCD Entries defined by this Platform
