@@ -84,6 +84,9 @@ Returns:
   UINT8       *TempPtr;
   UINT32      Retries;
   BOOLEAN     bResultFlag = FALSE;
+  UINT8       TempData[MAX_TEMP_DATA];
+
+  IPMI_SELF_TEST_RESULT_RESPONSE *SelfTestResult;
 
   //
   // Get the SELF TEST Results.
@@ -97,9 +100,10 @@ Returns:
     Retries = PcdGet8 (PcdIpmiBmcReadyDelayTimer);
   }
 
-  DataSize = sizeof (IpmiInstance->TempData);
+  DataSize = sizeof (TempData);
 
-  IpmiInstance->TempData[1] = 0;
+  SelfTestResult = (IPMI_SELF_TEST_RESULT_RESPONSE *) &TempData[0];
+  SelfTestResult->Result = 0;
 
   do {
     Status = IpmiSendCommand (
@@ -109,11 +113,11 @@ Returns:
                IPMI_APP_GET_SELFTEST_RESULTS,
                NULL,
                0,
-               IpmiInstance->TempData,
+               TempData,
                &DataSize
                );
     if (Status == EFI_SUCCESS) {
-      switch (IpmiInstance->TempData[1]) {
+      switch (SelfTestResult->Result) {
         case IPMI_APP_SELFTEST_NO_ERROR:
         case IPMI_APP_SELFTEST_NOT_IMPLEMENTED:
         case IPMI_APP_SELFTEST_ERROR:
@@ -146,7 +150,7 @@ Returns:
     IpmiInstance->BmcStatus = BMC_HARDFAIL;
     return Status;
   } else {
-    DEBUG ((EFI_D_INFO, "[IPMI] BMC self-test result: %02X-%02X\n", IpmiInstance->TempData[1], IpmiInstance->TempData[2]));
+    DEBUG ((DEBUG_INFO, "[IPMI] BMC self-test result: %02X-%02X\n", SelfTestResult->Result, SelfTestResult->Param));
     //
     // Copy the Self test results to Error Status.  Data will be copied as long as it
     // does not exceed the size of the ErrorStatus variable.
@@ -155,13 +159,13 @@ Returns:
          (Index < DataSize) && (Index < sizeof (IpmiInstance->ErrorStatus));
          Index++, TempPtr++
          ) {
-      *TempPtr = IpmiInstance->TempData[Index];
+      *TempPtr = TempData[Index];
     }
     //
     // Check the IPMI defined self test results.
     // Additional Cases are device specific test results.
     //
-    switch (IpmiInstance->TempData[0]) {
+    switch (SelfTestResult->Result) {
       case IPMI_APP_SELFTEST_NO_ERROR:
       case IPMI_APP_SELFTEST_NOT_IMPLEMENTED:
         IpmiInstance->BmcStatus = BMC_OK;
@@ -173,7 +177,7 @@ Returns:
         // BootBlock Firmware corruption, and Operational Firmware Corruption.  All
         // other errors are BMC soft failures.
         //
-        if ((IpmiInstance->TempData[1] & (IPMI_APP_SELFTEST_FRU_CORRUPT | IPMI_APP_SELFTEST_FW_BOOTBLOCK_CORRUPT | IPMI_APP_SELFTEST_FW_CORRUPT)) != 0) {
+        if ((SelfTestResult->Param & (IPMI_APP_SELFTEST_FRU_CORRUPT | IPMI_APP_SELFTEST_FW_BOOTBLOCK_CORRUPT | IPMI_APP_SELFTEST_FW_CORRUPT)) != 0) {
           IpmiInstance->BmcStatus = BMC_HARDFAIL;
         } else {
           IpmiInstance->BmcStatus = BMC_SOFTFAIL;
@@ -181,7 +185,7 @@ Returns:
         //
         // Check if SDR repository is empty and report it if it is.
         //
-        if ((IpmiInstance->TempData[1] & IPMI_APP_SELFTEST_SDR_REPOSITORY_EMPTY) != 0) {
+        if ((SelfTestResult->Param & IPMI_APP_SELFTEST_SDR_REPOSITORY_EMPTY) != 0) {
           if (*ErrorCount < MAX_SOFT_COUNT) {
             StatusCodeValue[*ErrorCount] = EFI_COMPUTING_UNIT_FIRMWARE_PROCESSOR | CU_FP_EC_SDR_EMPTY;
             (*ErrorCount)++;
@@ -194,6 +198,7 @@ Returns:
         break;
 
       default:
+        IpmiInstance->BmcStatus = BMC_HARDFAIL;
         //
         // Call routine to check device specific failures.
         //
@@ -244,6 +249,8 @@ Returns:
   SM_CTRL_INFO                    *pBmcInfo;
   IPMI_MSG_GET_BMC_EXEC_RSP       *pBmcExecContext;
   UINT32                          Retries;
+  UINT8                           TempData[MAX_TEMP_DATA];
+
 #ifdef FAST_VIDEO_SUPPORT
   EFI_VIDEOPRINT_PROTOCOL         *VideoPrintProtocol;
   EFI_STATUS                      VideoPrintStatus;
@@ -266,16 +273,16 @@ Returns:
   //
   // Get the device ID information for the BMC.
   //
-  DataSize = sizeof (IpmiInstance->TempData);
+  DataSize = sizeof (TempData);
   while (EFI_ERROR (Status = IpmiSendCommand (
                                &IpmiInstance->IpmiTransport,
                                IPMI_NETFN_APP, 0,
                                IPMI_APP_GET_DEVICE_ID,
                                NULL, 0,
-                               IpmiInstance->TempData, &DataSize))
+                               TempData, &DataSize))
          ) {
     DEBUG ((DEBUG_ERROR, "[IPMI] BMC does not respond by Get BMC DID (status: %r), %d retries left, ResponseData: 0x%lx\n",
-            Status, Retries, IpmiInstance->TempData));
+            Status, Retries, TempData));
 
     if (Retries-- == 0) {
       IpmiInstance->BmcStatus = BMC_HARDFAIL;
@@ -287,7 +294,7 @@ Returns:
     MicroSecondDelay (1*1000*1000);
   }
 
-  pBmcInfo = (SM_CTRL_INFO*)&IpmiInstance->TempData[0];
+  pBmcInfo = (SM_CTRL_INFO*)&TempData[0];
   DEBUG ((EFI_D_ERROR, "[IPMI] BMC Device ID: 0x%02X, firmware version: %d.%02X UpdateMode:%x\n", pBmcInfo->DeviceId, pBmcInfo->MajorFirmwareRev, pBmcInfo->MinorFirmwareRev,pBmcInfo->UpdateMode));
   //
   // In OpenBMC, UpdateMode: the bit 7 of byte 4 in get device id command is used for the BMC status:
@@ -298,15 +305,16 @@ Returns:
     mIpmiInstance->BmcStatus = BMC_OK;
     return EFI_SUCCESS;
   } else {
+    DataSize = sizeof (TempData);
     Status = IpmiSendCommand (
                &IpmiInstance->IpmiTransport,
                IPMI_NETFN_FIRMWARE, 0,
                IPMI_GET_BMC_EXECUTION_CONTEXT,
                NULL, 0,
-               IpmiInstance->TempData, &DataSize
+               TempData, &DataSize
                );
 
-    pBmcExecContext = (IPMI_MSG_GET_BMC_EXEC_RSP*)&IpmiInstance->TempData[0];
+    pBmcExecContext = (IPMI_MSG_GET_BMC_EXEC_RSP*)&TempData[0];
     DEBUG ((DEBUG_INFO, "[IPMI] Operational status of BMC: 0x%x\n", pBmcExecContext->CurrentExecutionContext));
     if ((pBmcExecContext->CurrentExecutionContext == IPMI_BMC_IN_FORCED_UPDATE_MODE) &&
         !EFI_ERROR (Status)) {
@@ -319,17 +327,18 @@ Returns:
       while (Retries-- != 0) {
         MicroSecondDelay(1*1000*1000); //delay 1 seconds
         DEBUG ((EFI_D_ERROR, "[IPMI] UpdateMode Retries: %d \n",Retries));
+        DataSize = sizeof (TempData);
         Status = IpmiSendCommand (
                    &IpmiInstance->IpmiTransport,
                    IPMI_NETFN_APP, 0,
                    IPMI_APP_GET_DEVICE_ID,
                    NULL, 0,
-                   IpmiInstance->TempData, &DataSize
+                   TempData, &DataSize
                    );
 
         if (!EFI_ERROR (Status)) {
-          pBmcInfo = (SM_CTRL_INFO*)&IpmiInstance->TempData[0];
-          DEBUG ((EFI_D_ERROR, "[IPMI] UpdateMode Retries: %d   pBmcInfo->UpdateMode:%x, Status: %r, Response Data: 0x%lx\n",Retries, pBmcInfo->UpdateMode, Status, IpmiInstance->TempData));
+          pBmcInfo = (SM_CTRL_INFO*)&TempData[0];
+          DEBUG ((DEBUG_ERROR, "[IPMI] UpdateMode Retries: %d   pBmcInfo->UpdateMode:%x, Status: %r, Response Data: 0x%lx\n",Retries, pBmcInfo->UpdateMode, Status, TempData));
           if (pBmcInfo->UpdateMode == BMC_READY) {
             mIpmiInstance->BmcStatus = BMC_OK;
             return EFI_SUCCESS;
