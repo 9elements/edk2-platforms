@@ -31,6 +31,7 @@
   INF_VERSION          = 0x00010005
   BASE_NAME            = GigUndiDxe
   FILE_GUID            = BB801A52-C90F-4EDE-91B2-82520888CBC3
+  MODULE_UNI_FILE      = GigUndiDxe.uni
 
   # UEFI_DRIVER is compliant with EFI1.10 or UEFI 2.0 specification
   MODULE_TYPE          = UEFI_DRIVER

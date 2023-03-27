@@ -31,6 +31,7 @@
   INF_VERSION          = 0x00010005
   BASE_NAME            = XGigUndiDxe
   FILE_GUID            = 507df75d-7383-4ceb-a83a-60776a80d32c
+  MODULE_UNI_FILE      = XGigUndiDxe.uni
 
   # UEFI_DRIVER is compliant with EFI1.10 or UEFI 2.3 specification
   MODULE_TYPE          = UEFI_DRIVER
