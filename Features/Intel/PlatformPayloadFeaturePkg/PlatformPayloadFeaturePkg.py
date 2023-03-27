@@ -34,17 +34,6 @@ def BuildUniversalPayload(Args, MacroList):
     ElfToolChain = 'CLANGDWARF'
     ObjCopyFlag  = "elf64-x86-64" if Args.Arch == 'X64' else "elf32-i386"
 
-    #
-    # Find universal UEFI payload build build script
-    #
-    Edk2PayloadBuildScript = os.path.normpath("UefiPayloadPkg/UniversalPayloadBuild.py")
-    for package_path in os.environ['PACKAGES_PATH'].split(';'):
-        if os.path.exists (os.path.join (package_path, Edk2PayloadBuildScript)):
-            Edk2PayloadBuildScript = os.path.join (package_path, Edk2PayloadBuildScript)
-            break
-    if not os.path.exists (Edk2PayloadBuildScript):
-        raise Exception("Could not find universal UEFI payload build script UniversalPayloadBuild.py")
-
     PlatformFvDscPath      = os.path.normpath("PlatformPayloadFeaturePkg/PlatformPayloadFeaturePkg.dsc")
     BuildDir               = os.path.join(os.environ['WORKSPACE'], os.path.normpath("Build/UefiPayloadPkgX64"))
     PlatformFvReportPath   = os.path.join(BuildDir, "PlatformPayloadReport.txt")
@@ -69,8 +58,19 @@ def BuildUniversalPayload(Args, MacroList):
     # Building Universal Payload entry.
     #
     if not Args.Skip:
-         BuildPayload = f"python {Edk2PayloadBuildScript} -b {BuildTarget} -t {ToolChain} -a {Args.Arch} {Defines}"
-         RunCommand(BuildPayload)
+        #
+        # Find universal UEFI payload build build script
+        #
+        Edk2PayloadBuildScript = os.path.normpath("UefiPayloadPkg/UniversalPayloadBuild.py")
+        for package_path in os.environ['PACKAGES_PATH'].split(';'):
+            if os.path.exists (os.path.join (package_path, Edk2PayloadBuildScript)):
+                Edk2PayloadBuildScript = os.path.join (package_path, Edk2PayloadBuildScript)
+                break
+        if not os.path.exists (Edk2PayloadBuildScript):
+            raise Exception("Could not find universal UEFI payload build script UniversalPayloadBuild.py")
+        
+        BuildPayload = f"python {Edk2PayloadBuildScript} -b {BuildTarget} -t {ToolChain} -a {Args.Arch} {Defines}"
+        RunCommand(BuildPayload)
 
     #
     # Building Platform Payload.
