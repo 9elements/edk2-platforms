@@ -37,6 +37,10 @@
   FvForceRebase      = FALSE
 
   !include Include/PostMemory.fdf
+  !include BoardCommon/PostMemory.fdf
+  !if $(BOARD) != NullTemplate
+    !include Board$(BOARD)/PostMemory.fdf
+  !endif
 
 ################################################################################
 #

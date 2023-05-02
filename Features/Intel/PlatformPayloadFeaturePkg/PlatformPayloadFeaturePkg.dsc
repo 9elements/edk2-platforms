@@ -27,6 +27,11 @@
   PCD_DYNAMIC_AS_DYNAMICEX            = TRUE
   DXE_ARCH                            = X64
 
+  #
+  # Define to compile board-specific features
+  #
+  DEFINE BOARD                        = NullTemplate
+
   !ifndef SMM_VARIABLE
     DEFINE SMM_VARIABLE                 = TRUE
   !endif
@@ -121,6 +126,10 @@
 # This package always builds the feature.
 #
 !include Include/PlatformPayloadFeature.dsc
+!include BoardCommon/BoardFeature.dsc
+!if $(BOARD) != NullTemplate
+  !include Board$(BOARD)/BoardFeature.dsc
+!endif
 
 [BuildOptions]
   *_*_*_CC_FLAGS                 = -D DISABLE_NEW_DEPRECATED_INTERFACES
