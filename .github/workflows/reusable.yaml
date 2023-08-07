@@ -9,6 +9,11 @@ on:
         required: false
         default: ""
         type: string
+    secrets:
+      MY_REPO_PAT:
+        description: 'A token passed from the caller workflow containing a PAT'
+        required: false
+
 jobs:
   # Should be an action
   reusable_intel_undipkg_build:
@@ -19,6 +24,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
+          token: ${{ secrets.MY_REPO_PAT }}
+
       - name: Build IntelUndiPkg
         shell: bash
         run: |
