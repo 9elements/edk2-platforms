@@ -26,6 +26,19 @@ jobs:
           submodules: 'recursive'
           token: ${{ secrets.MY_REPO_PAT || github.token }}
 
+      - name: Extract branch name
+        shell: bash
+        working-directory: ${{ inputs.submodule_path }}
+        run: git config --global --add safe.directory '*';echo "branch=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Restore Build directory
+        uses: actions/cache/restore@v3
+        id: get-cached-fsp-build
+        with:
+          path: /repo/Edk2/Build/IntelUndiPkg
+          key: ${{ runner.os }}-${{ steps.extract_branch.outputs.branch }}
+
       - name: Build IntelUndiPkg
         shell: bash
         run: |
@@ -46,6 +59,12 @@ jobs:
             cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/I40eUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/I40eUndiDxe.efi
             cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/IceUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/IceUndiDxe.efi
             cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/XGigUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/XGigUndiDxe.efi
+      - name: Store Build directory
+        uses: actions/cache/save@v3
+        id: cache-fsp-build
+        with:
+          path: /repo/Edk2/Build/IntelUndiPkg
+          key: ${{ runner.os }}-${{ steps.extract_branch.outputs.branch }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
