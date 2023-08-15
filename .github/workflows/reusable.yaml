@@ -37,7 +37,7 @@ jobs:
         id: get-cached-fsp-build
         with:
           path: /repo/Edk2/Build/IntelUndiPkg
-          key: ${{ runner.os }}-${{ steps.extract_branch.outputs.branch }}
+          key: ${{ runner.os }}-undi-${{ inputs.release_type }}-${{ steps.extract_branch.outputs.branch }}
 
       - name: Build IntelUndiPkg
         shell: bash
@@ -64,7 +64,7 @@ jobs:
         id: cache-fsp-build
         with:
           path: /repo/Edk2/Build/IntelUndiPkg
-          key: ${{ runner.os }}-${{ steps.extract_branch.outputs.branch }}
+          key: ${{ runner.os }}-undi-${{ inputs.release_type }}-${{ steps.extract_branch.outputs.branch }}
 
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
