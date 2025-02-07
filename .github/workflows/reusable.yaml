@@ -19,7 +19,7 @@ jobs:
   reusable_intel_undipkg_build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/9elements/uefi:edk2-stable202205
+      image: ghcr.io/9elements/firmware-action/edk2-stable202205:latest
     steps:
       - uses: actions/checkout@v4
         with:
