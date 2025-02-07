@@ -19,9 +19,9 @@ jobs:
   reusable_intel_undipkg_build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/9elements/uefi:edk2-stable202205
+      image: ghcr.io/9elements/firmware-action/edk2-stable202205:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
           token: ${{ secrets.MY_REPO_PAT || github.token }}
@@ -33,7 +33,7 @@ jobs:
         id: extract_branch
 
       - name: Restore Build directory
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: get-cached-fsp-build
         with:
           path: /repo/Edk2/Build/IntelUndiPkg
@@ -60,32 +60,32 @@ jobs:
             cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/IceUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/IceUndiDxe.efi
             cp Build/IntelUndiPkg/${{ inputs.release_type }}_GCC5/X64/XGigUndiDxe.efi ${GITHUB_WORKSPACE}/${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/XGigUndiDxe.efi
       - name: Store Build directory
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         id: cache-fsp-build
         with:
           path: /repo/Edk2/Build/IntelUndiPkg
           key: ${{ runner.os }}-undi-${{ inputs.release_type }}-${{ steps.extract_branch.outputs.branch }}
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: intel-undi-GigUndiDxe-${{ inputs.release_type }}
           path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/GigUndiDxe.efi
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: intel-undi-I40eUndiDxe-${{ inputs.release_type }}
           path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/I40eUndiDxe.efi
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: intel-undi-IceUndiDxe-${{ inputs.release_type }}
           path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/IceUndiDxe.efi
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: intel-undi-XGigUndiDxe-${{ inputs.release_type }}
           path: ./${{ inputs.submodule_path }}/Features/Intel/Network/IntelUndiPkg/XGigUndiDxe.efi
